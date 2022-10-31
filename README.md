@@ -708,9 +708,11 @@ En primer lugar vamos a configurar websocket en la parte de la api. Para ello va
 
 Ya que nuestro back recibirá peticiones del front, necesitaremos autorizar las mismas con fastify-cors:
 
-> `CORS`: Nosotros tenemos una web corriendo en localhost:3000 y otra en localhost:3001. ¿Qué ocurre? Como es una web haciendo una petición a otra con dominio distinto se activa la protección del nevagor cors: Cross-Origin Resource Sharing (secure cross-origin requests).
+> `CORS`: Nosotros tenemos una web corriendo en localhost:3000 y otra en localhost:3001. ¿Qué ocurre? Como es una web haciendo una petición a otra con dominio distinto `se activa la protección del nevagor cors`: Cross-Origin Resource Sharing (secure cross-origin requests).
 >
-> Este protocolo de seguridad es clave: por ejemplo, si mi página web seteara una cookie en el navegador e hiciera una petición AJAX (peticiones que se realizan directamente sobre el servidor) a otra web puede ser que, por malicia o por mala práctica, estemos pidiendo información desde un origen malicioso. Es decir: nosotros queremos protegernos de terceros y otras páginas, como un banco, solo querrán peticiones desde una lista de dominios autorizados.
+> Por defecto, los navegadores permiten enlazar hacia documentos situados en todo tipo de dominios si lo hacemos desde el HTML o desde Javascript utilizando la API DOM (que a su vez está construyendo un HTML). Sin embargo, no ocurre lo mismo cuando se trata de peticiones HTTP asíncronas mediante Javascript (AJAX), sea a través de XMLHttpRequest, de fetch o de librerías similares para el mismo propósito.
+>
+> Utilizando este tipo de peticiones asíncronas, los recursos situados en dominios diferentes al de la página actual no están permitidos por defecto. Es lo que se suele denominar protección de CORS. Su finalidad es dificultar la posibilidad de añadir recursos ajenos en un sitio determinado.
 >
 > Para evitar esto, vamos a configurar el pluggin [fastify-cors](https://github.com/fastify/fastify-cors) el cual setea información en el header y permite que cualquier persona pueda hacer una petición a nuesta página.
 
@@ -819,6 +821,8 @@ Dentro de las acciones actuales vamos a crear una nueva llamada `connectWebsocke
 - Obtendrá información de la variable global NEXT_PUBLIC_SOCKET_URL
 - Iniciará un nuevo socket
 - Añadirá el socket al servidor
+
+> `Dispatch`: Es una función que permite lanzar acciones (actions) al store, con la intención de afectar el estado.
 
 > useChat.ts
 
@@ -967,6 +971,8 @@ const Chat = () => {
 export default Chat;
 ```
 
+## socket.on(eventName, callback)
+
 Ya tenemos nuestro socket en local conectado al socket de la api. Ahora vamos a emitir los mensajes. Para ello emplearemos la función [socket.on(eventName, callback)](https://socket.io/docs/v4/client-api/#socketoneventname-callback) que espera un name del evento y una función como callback. socket.on registrará un nuevo canal para un evento dado. Los canales son connect, disconnect y message.
 
 > useChat.tsx
@@ -1047,7 +1053,7 @@ const useChat = createHook(Store);
 export default useChat;
 ```
 
-Y añadimos la función receivedMessage:
+Y añadimos la función `receivedMessage`:
 
 > useChat.tsx
 
@@ -1103,7 +1109,7 @@ const useChat = createHook(Store);
 export default useChat;
 ```
 
-¡Importante!, no nos olvidemos de ejecutar el envío de mensajes mediante dispatch:
+¡Importante!, no nos olvidemos de ejecutar el envío de mensajes mediante dispatch en la función de sendLocalMessage:
 
 > useChat
 
@@ -1147,3 +1153,5 @@ const useChat = createHook(Store);
 
 export default useChat;
 ```
+
+Y hasta aquí, nuestro chat completamente funcional hecho en REACT y WEBSOCKETS.
